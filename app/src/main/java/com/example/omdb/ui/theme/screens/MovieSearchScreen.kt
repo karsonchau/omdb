@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,8 +54,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.omdb.R
 import com.example.omdb.model.Movie
 import com.example.omdb.model.MovieSearchResult
@@ -72,10 +72,10 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 
 @Composable
-fun HomeScreen(viewModel: MovieViewModel = hiltViewModel(),
-               snackbarHostState: SnackbarHostState,
-               coroutineScope: CoroutineScope,
-               contentPadding: PaddingValues = PaddingValues(0.dp)) {
+fun MovieSearchScreen(viewModel: MovieSearchViewModel = hiltViewModel(),
+                      snackbarHostState: SnackbarHostState,
+                      coroutineScope: CoroutineScope,
+                      contentPadding: PaddingValues = PaddingValues(0.dp)) {
     val uiState by viewModel.movieUiState.collectAsStateWithLifecycle()
     val hasNetwork by viewModel.isConnected.collectAsStateWithLifecycle()
 
@@ -87,10 +87,7 @@ fun HomeScreen(viewModel: MovieViewModel = hiltViewModel(),
         mutableStateOf<MovieType?>(null)
     }
     var initialCheck by remember { mutableStateOf(true) }
-
-
     val keyboardController = LocalSoftwareKeyboardController.current
-
 
     LaunchedEffect(uiState) {
         if (uiState is MovieUiState.Error) {
@@ -151,7 +148,7 @@ fun HomeScreen(viewModel: MovieViewModel = hiltViewModel(),
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Button(onClick = {
                 keyboardController?.hide()
-                viewModel.searchMoviesByTitle(
+                viewModel.searchMovies(
                     title = searchTerm.text,
                 year = year,
                 movieType = movieType) }) {
@@ -169,7 +166,7 @@ fun HomeScreen(viewModel: MovieViewModel = hiltViewModel(),
         if (uiState is MovieUiState.Success) {
             MovieList((uiState as MovieUiState.Success).result,
                 onLoadMore = {
-                    viewModel.searchMoviesByTitle(
+                    viewModel.searchMovies(
                         title = searchTerm.text,
                         year = year,
                         movieType = movieType)
@@ -196,7 +193,10 @@ fun MovieTypes(movieType: MovieType?, onMovieTypeChange: (MovieType?) -> Unit) {
         OutlinedButton(onClick = { expanded = true },
             modifier = Modifier.width(dropdownWidth)) {
             Text(text = selectedOption ?: "")
-            Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(id = R.string.dropdown_arrow))
+            Icon(
+                Icons.Default.ArrowDropDown,
+                contentDescription = stringResource(id = R.string.dropdown_arrow)
+            )
         }
 
         DropdownMenu(
@@ -207,6 +207,12 @@ fun MovieTypes(movieType: MovieType?, onMovieTypeChange: (MovieType?) -> Unit) {
             options.forEach { (key, value) ->
                 DropdownMenuItem(
                     text = { Text(value) },
+                    trailingIcon = {
+                        if (value == selectedOption) {
+                            Icon(Icons.Default.Check,
+                                contentDescription = stringResource(id = R.string.selected))
+                        }
+                    },
                     onClick = {
                         onMovieTypeChange(MovieType.entries.find { it.value.equals(key, ignoreCase = true) })
                         expanded = false
@@ -244,6 +250,12 @@ fun YearDropdown(
             years.forEach { year ->
                 DropdownMenuItem(
                     text = { Text(year) },
+                    trailingIcon = {
+                        if (year == selectedYear) {
+                            Icon(Icons.Default.Check,
+                                contentDescription = stringResource(id = R.string.selected))
+                        }
+                    },
                     onClick = {
                         onYearSelected(year)
                         expanded = false
@@ -285,7 +297,6 @@ fun MovieList(result: MovieSearchResult, onLoadMore: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun MovieItem(movie: Movie) {
     val backgroundColor = when (movie.type) {
@@ -298,8 +309,8 @@ fun MovieItem(movie: Movie) {
         Row(modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)) {
-            val imagePainter: Painter = if (movie.posterUrl == "N/A") painterResource(id = R.drawable.na_image) else 
-                rememberImagePainter(data = movie.posterUrl)
+            val imagePainter: Painter = if (movie.posterUrl.isEmpty() || movie.posterUrl == "N/A") painterResource(id = R.drawable.na_image) else
+                rememberAsyncImagePainter(model = movie.posterUrl)
             Image(
                 painter = imagePainter,
                 contentDescription = stringResource(id = R.string.movie_poster),

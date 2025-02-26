@@ -5,6 +5,7 @@ import com.example.omdb.network.AndroidNetworkObserver
 import com.example.omdb.BuildConfig
 import com.example.omdb.data.MoviesRepository
 import com.example.omdb.data.NetworkMoviesRepository
+import com.example.omdb.network.AuthInterceptor
 import com.example.omdb.network.MoviesApiService
 import com.example.omdb.network.NetworkObserver
 import com.example.omdb.network.RetryInterceptor
@@ -27,9 +28,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMoviesApiService(): MoviesApiService {
-
         val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(RetryInterceptor(BuildConfig.API_KEY))
+            .addInterceptor(AuthInterceptor(BuildConfig.API_KEY))
+            .addInterceptor(RetryInterceptor())
             .build()
 
         return Retrofit.Builder()

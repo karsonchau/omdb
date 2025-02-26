@@ -17,9 +17,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.omdb.ui.theme.screens.HomeScreen
-import com.example.omdb.ui.theme.screens.MovieViewModel
+import com.example.omdb.ui.theme.screens.MovieSearchScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +33,7 @@ fun MoviesSearchApp() {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            HomeScreen(
+            MovieSearchScreen(
                 snackbarHostState = snackbarHostState,
                 coroutineScope = coroutineScope,
                 contentPadding = it
