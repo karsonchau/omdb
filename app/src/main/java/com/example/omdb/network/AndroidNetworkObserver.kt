@@ -23,21 +23,25 @@ class AndroidNetworkObserver(context: Context): NetworkObserver {
                     super.onCapabilitiesChanged(network, networkCapabilities)
                     val connected = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
                     trySend(connected)
+                    hasConnection = connected
                 }
 
                 override fun onUnavailable() {
                     super.onUnavailable()
                     trySend(false)
+                    hasConnection = false
                 }
 
                 override fun onLost(network: Network) {
                     super.onLost(network)
                     trySend(false)
+                    hasConnection = false
                 }
 
                 override fun onAvailable(network: Network) {
                     super.onAvailable(network)
                     trySend(true)
+                    hasConnection = true
                 }
 
             }
@@ -46,4 +50,6 @@ class AndroidNetworkObserver(context: Context): NetworkObserver {
                 connectivityManager.unregisterNetworkCallback(callback)
             }
         }
+    override var hasConnection: Boolean = false
+        private set
 }

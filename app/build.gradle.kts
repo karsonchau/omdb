@@ -94,6 +94,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     testImplementation(libs.junit)
+    testImplementation(libs.turbine)
     // dagger test
     testImplementation(libs.hilt.android.testing)
     kaptTest(libs.hilt.android.compiler)

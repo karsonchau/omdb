@@ -27,7 +27,7 @@ sealed interface MovieUiState {
 @HiltViewModel
 class MovieSearchViewModel @Inject constructor(
     private val moviesRepository: MoviesRepository,
-    networkObserver: NetworkObserver
+    private val networkObserver: NetworkObserver
 ) : ViewModel() {
     private val _movieUiState = MutableStateFlow<MovieUiState>(MovieUiState.Success(MovieSearchResult(
         listOf(), 0, null
@@ -46,7 +46,8 @@ class MovieSearchViewModel @Inject constructor(
     fun searchMovies(title: String, year: String? = null, movieType: MovieType? = null) {
         if (title.isBlank() || isLoading) return
 
-        if (!isConnected.value) {
+
+        if (!networkObserver.hasConnection) {
             handleNoConnection()
             return
         }

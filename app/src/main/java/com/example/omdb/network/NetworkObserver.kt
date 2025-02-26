@@ -4,4 +4,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface NetworkObserver {
     val isConnected: Flow<Boolean>
+    val hasConnection: Boolean
 }
