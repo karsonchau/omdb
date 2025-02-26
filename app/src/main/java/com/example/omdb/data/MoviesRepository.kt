@@ -2,7 +2,6 @@ package com.example.omdb.data
 
 import com.example.omdb.model.ApiResult
 import com.example.omdb.model.MovieSearchResult
-import com.example.omdb.model.MovieType
 import com.example.omdb.network.MoviesApiService
 
 interface MoviesRepository {

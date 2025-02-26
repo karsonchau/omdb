@@ -1,52 +1,10 @@
-package com.example.omdb.data
+package com.example.omdb.network
 
-import android.content.Context
-import com.example.omdb.AndroidNetworkObserver
-import com.example.omdb.BuildConfig
-import com.example.omdb.network.MoviesApiService
-import com.example.omdb.network.NetworkObserver
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import retrofit2.Retrofit
-import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import okhttp3.Response
 import java.io.IOException
 import java.util.concurrent.TimeUnit
-
-
-interface AppContainer {
-    val moviesRepository: MoviesRepository
-    val networkObserver: NetworkObserver
-}
-
-class DefaultAppContainer(private val context: Context): AppContainer {
-    private val baseUrl = "https://www.omdbapi.com/"
-
-    private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(RetryInterceptor(BuildConfig.API_KEY))
-        .build()
-
-    private val retrofit: Retrofit = Retrofit.Builder()
-        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
-        .baseUrl(baseUrl)
-        .client(okHttpClient)
-        .build()
-
-    private val retrofitService: MoviesApiService by lazy {
-        retrofit.create(MoviesApiService::class.java)
-    }
-
-    override val moviesRepository: MoviesRepository by lazy {
-        NetworkMoviesRepository(retrofitService)
-    }
-
-    override val networkObserver: NetworkObserver by lazy {
-        AndroidNetworkObserver(context = context)
-    }
-}
 
 class RetryInterceptor(
     private val apiKey: String,

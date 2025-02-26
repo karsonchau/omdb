@@ -46,10 +46,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -70,10 +72,13 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 
 @Composable
-fun HomeScreen(viewModel: MovieViewModel,
+fun HomeScreen(viewModel: MovieViewModel = hiltViewModel(),
                snackbarHostState: SnackbarHostState,
                coroutineScope: CoroutineScope,
                contentPadding: PaddingValues = PaddingValues(0.dp)) {
+    val uiState by viewModel.movieUiState.collectAsStateWithLifecycle()
+    val hasNetwork by viewModel.isConnected.collectAsStateWithLifecycle()
+
     var searchTerm by remember { mutableStateOf(TextFieldValue()) }
     var year by remember {
         mutableStateOf<String?>(null)
@@ -82,8 +87,10 @@ fun HomeScreen(viewModel: MovieViewModel,
         mutableStateOf<MovieType?>(null)
     }
     var initialCheck by remember { mutableStateOf(true) }
-    val uiState by viewModel.movieUiState.collectAsStateWithLifecycle()
-    val hasNetwork by viewModel.isConnected.collectAsStateWithLifecycle()
+
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
 
     LaunchedEffect(uiState) {
         if (uiState is MovieUiState.Error) {
@@ -142,7 +149,9 @@ fun HomeScreen(viewModel: MovieViewModel,
             })
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(onClick = { viewModel.searchMoviesByTitle(
+            Button(onClick = {
+                keyboardController?.hide()
+                viewModel.searchMoviesByTitle(
                     title = searchTerm.text,
                 year = year,
                 movieType = movieType) }) {
@@ -168,6 +177,7 @@ fun HomeScreen(viewModel: MovieViewModel,
         }
     }
 }
+
 @Composable
 fun MovieTypes(movieType: MovieType?, onMovieTypeChange: (MovieType?) -> Unit) {
     var expanded by remember { mutableStateOf(false) }

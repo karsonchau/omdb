@@ -3,7 +3,9 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.hilt.android)
     kotlin("plugin.serialization") version "1.9.21"
+    id("kotlin-kapt")
 }
 
 android {
@@ -86,7 +88,19 @@ dependencies {
     // coil
     implementation(libs.coil.compose)
 
+    //dagger
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
     testImplementation(libs.junit)
+    // dagger test
+    testImplementation(libs.hilt.android.testing)
+    kaptTest(libs.hilt.android.compiler)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

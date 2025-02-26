@@ -35,10 +35,7 @@ fun MoviesSearchApp() {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            val movieViewModel: MovieViewModel =
-                viewModel(factory = MovieViewModel.Factory)
             HomeScreen(
-                viewModel = movieViewModel,
                 snackbarHostState = snackbarHostState,
                 coroutineScope = coroutineScope,
                 contentPadding = it

@@ -1,18 +1,14 @@
 package com.example.omdb.ui.theme.screens
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.omdb.MoviesApplication
 import com.example.omdb.data.MoviesRepository
 import com.example.omdb.model.ApiResult
 import com.example.omdb.model.MovieSearchParams
 import com.example.omdb.model.MovieSearchResult
 import com.example.omdb.model.MovieType
 import com.example.omdb.network.NetworkObserver
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,13 +17,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 sealed interface MovieUiState {
     data class Success(val result: MovieSearchResult) : MovieUiState
     data class Error(val message: String) : MovieUiState
 }
 
-class MovieViewModel(private val moviesRepository: MoviesRepository, private val networkObserver: NetworkObserver): ViewModel() {
+@HiltViewModel
+class MovieViewModel @Inject constructor(
+    private val moviesRepository: MoviesRepository,
+    networkObserver: NetworkObserver
+) : ViewModel() {
     private val _movieUiState = MutableStateFlow<MovieUiState>(MovieUiState.Success(MovieSearchResult(
         listOf(), 0, null
     )))
@@ -42,7 +43,7 @@ class MovieViewModel(private val moviesRepository: MoviesRepository, private val
     private val take = 10
     private var isLoading = false
 
-    fun searchMoviesByTitle(title: String, year: String? = null, movieType: MovieType?) {
+    fun searchMoviesByTitle(title: String, year: String? = null, movieType: MovieType? = null) {
         if (title.isBlank() || isLoading) return
 
         if (!isConnected.value) {
@@ -119,19 +120,6 @@ class MovieViewModel(private val moviesRepository: MoviesRepository, private val
             MovieUiState.Success(MovieSearchResult(
                 listOf(), 0
             ))
-        }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application = (this[APPLICATION_KEY] as MoviesApplication)
-                val moviesRepository = application.container.moviesRepository
-                val networkObserver = application.container.networkObserver
-                MovieViewModel(
-                    moviesRepository = moviesRepository,
-                    networkObserver = networkObserver)
-            }
         }
     }
 }
