@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">OMDb</string>
+    <string name="all">All</string>
+    <string name="click">Click</string>
+    <string name="dropdown_arrow">Dropdown arrow</string>
+    <string name="episode">Episode</string>
+    <string name="game">Game</string>
+    <string name="movie">Movie</string>
+    <string name="movie_poster">Movie poster</string>
+    <string name="no_network_connection">No network connection!</string>
+    <string name="select_year">Select year</string>
+    <string name="series">Series</string>
+    <string name="title">Title</string>
+    <string name="year">Year: %s</string>
+</resources>
