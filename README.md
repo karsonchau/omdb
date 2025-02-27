@@ -7,6 +7,8 @@ OMDb is an Android application that allows users to search for movies using the 
 - Filter results by year and type (movie, series, or episode).
 - Display search results in a user-friendly interface.
 
+![Alt text](assets/screenshot.png)
+
 ## Getting Started
 ### Prerequisites
 - Android Studio installed on your system.
@@ -21,7 +23,7 @@ To use this application, you need an API key from OMDb. Follow these steps:
 ### Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/karsonchau/OMDb.git
+   git clone https://github.com/karsonchau/omdb.git
    ```
 2. Open the project in Android Studio.
 3. Add your OMDb API key in the `local.properties` file in the following format:
@@ -33,7 +35,7 @@ To use this application, you need an API key from OMDb. Follow these steps:
 ## Usage
 1. Enter a movie title in the search bar.
 2. Optionally, specify the year and type (movie, series, or episode).
-3. Press the search button to retrieve results.
+3. Changes to the search criteria will automatically trigger a reload.
 4. View movie details in the search results.
 
 ## Technologies Used
