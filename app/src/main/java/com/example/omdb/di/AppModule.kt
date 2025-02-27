@@ -52,4 +52,10 @@ object AppModule {
     fun provideNetworkObserver(@ApplicationContext context: Context): NetworkObserver {
         return AndroidNetworkObserver(context)
     }
+
+    @Provides
+    @Singleton
+    fun provideContextProvider(): CoroutineContextProvider {
+        return CoroutineContextProvider.Default()
+    }
 }

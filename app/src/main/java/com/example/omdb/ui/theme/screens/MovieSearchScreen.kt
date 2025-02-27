@@ -16,9 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
@@ -47,10 +47,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.semantics.CollectionInfo
+import androidx.compose.ui.semantics.CollectionItemInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.collectionInfo
+import androidx.compose.ui.semantics.collectionItemInfo
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -78,16 +83,8 @@ fun MovieSearchScreen(viewModel: MovieSearchViewModel = hiltViewModel(),
                       contentPadding: PaddingValues = PaddingValues(0.dp)) {
     val uiState by viewModel.movieUiState.collectAsStateWithLifecycle()
     val hasNetwork by viewModel.isConnected.collectAsStateWithLifecycle()
-
-    var searchTerm by remember { mutableStateOf(TextFieldValue()) }
-    var year by remember {
-        mutableStateOf<String?>(null)
-    }
-    var movieType by remember {
-        mutableStateOf<MovieType?>(null)
-    }
+    val searchUiState by viewModel.searchState.collectAsStateWithLifecycle()
     var initialCheck by remember { mutableStateOf(true) }
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(uiState) {
         if (uiState is MovieUiState.Error) {
@@ -121,12 +118,9 @@ fun MovieSearchScreen(viewModel: MovieSearchViewModel = hiltViewModel(),
         .fillMaxSize()
         .padding(16.dp)) {
         OutlinedTextField(
-            value = searchTerm,
+            value = searchUiState.title,
             onValueChange = {
-                searchTerm = it
-                if (it.text.isEmpty()) {
-                    viewModel.reset()
-                }
+                viewModel.onTitleChange(title = it)
             },
             placeholder = {
                 Text(text = stringResource(id = R.string.title))
@@ -134,42 +128,32 @@ fun MovieSearchScreen(viewModel: MovieSearchViewModel = hiltViewModel(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            keyboardActions = KeyboardActions.Default
+            keyboardActions = KeyboardActions.Default,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            YearDropdown(selectedYear = year, onYearSelected = { updatedYear ->
-                year = updatedYear
+        Row(horizontalArrangement = Arrangement.Center) {
+            YearDropdown(selectedYear = searchUiState.year, onYearSelected = { updatedYear ->
+                viewModel.onYearChange(year = updatedYear)
             })
-            MovieTypes(movieType = movieType,
+            Spacer(modifier = Modifier.width(10.dp))
+            MovieTypes(movieType = searchUiState.movieType,
                 onMovieTypeChange = { updatedMovieType ->
-                    movieType = updatedMovieType
+                    viewModel.onMovieType(movieType = updatedMovieType)
             })
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(onClick = {
-                keyboardController?.hide()
-                viewModel.searchMovies(
-                    title = searchTerm.text,
-                year = year,
-                movieType = movieType) }) {
-                Text(text = "Search")
-            }
-            Button(onClick = {
-                searchTerm = TextFieldValue()
-                year = null
-                viewModel.reset()
-            }) {
-                Text(text = "Reset")
-            }
+        Button(onClick = {
+            viewModel.reset()
+        }) {
+            Text(text = "Reset")
         }
         Spacer(modifier = Modifier.height(16.dp))
         if (uiState is MovieUiState.Success) {
             MovieList((uiState as MovieUiState.Success).result,
                 onLoadMore = {
                     viewModel.searchMovies(
-                        title = searchTerm.text,
-                        year = year,
-                        movieType = movieType)
+                        title = searchUiState.title,
+                        year = searchUiState.year,
+                        movieType = searchUiState.movieType)
             })
         }
     }
@@ -231,14 +215,14 @@ fun YearDropdown(
     var expanded by remember { mutableStateOf(false) }
     val currentYear = Calendar.getInstance().get(Calendar.YEAR)
     val years = (1950..currentYear).map { it.toString() }.reversed().toMutableList()
-    years.add(0, "")
+    years.add(0, LocalContext.current.getString(R.string.any_year))
 
     val dropdownWidth = 150.dp
 
     Box {
         OutlinedButton(onClick = { expanded = true },
             modifier = Modifier.width(dropdownWidth)) {
-            Text(text = (if (selectedYear.isNullOrEmpty()) stringResource(id = R.string.select_year) else selectedYear)) // Default to empty
+            Text(text = (if (selectedYear.isNullOrEmpty()) stringResource(id = R.string.any_year) else selectedYear)) // Default to empty
             Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(id = R.string.dropdown_arrow))
         }
 
@@ -247,11 +231,11 @@ fun YearDropdown(
             onDismissRequest = { expanded = false },
             modifier = Modifier.width(dropdownWidth)
         ) {
-            years.forEach { year ->
+            years.forEachIndexed { index, year ->
                 DropdownMenuItem(
                     text = { Text(year) },
                     trailingIcon = {
-                        if (year == selectedYear) {
+                        if (year == selectedYear || (index == 0 && selectedYear == null)) {
                             Icon(Icons.Default.Check,
                                 contentDescription = stringResource(id = R.string.selected))
                         }
@@ -273,9 +257,13 @@ fun MovieList(result: MovieSearchResult, onLoadMore: () -> Unit) {
     val totalCount = result.totalResults
     LazyColumn(
         state = listState,
-        verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        items(movies, key = { movie -> movie.imdbID }) { movie ->
-            MovieItem(movie = movie)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.semantics {
+            collectionInfo = CollectionInfo(rowCount = movies.size, columnCount =  1)
+        }) {
+        items(movies.size, key = { index -> movies[index].imdbID }) { index ->
+            val movie = movies[index]
+            MovieItem(movie = movie, index = index)
         }
         if (movies.size != totalCount && totalCount != 0) {
             item {
@@ -298,7 +286,7 @@ fun MovieList(result: MovieSearchResult, onLoadMore: () -> Unit) {
 }
 
 @Composable
-fun MovieItem(movie: Movie) {
+fun MovieItem(movie: Movie, index: Int) {
     val backgroundColor = when (movie.type) {
         MovieType.MOVIE -> if (isSystemInDarkTheme()) DarkMovieBlue else LightMovieBlue
         MovieType.SERIES -> if (isSystemInDarkTheme()) DarkSeriesGreen else LightSeriesGreen
@@ -307,13 +295,21 @@ fun MovieItem(movie: Movie) {
     }
     Card(colors = CardDefaults.cardColors(containerColor = backgroundColor)) {
         Row(modifier = Modifier
+            .semantics(mergeDescendants = true) {
+                collectionItemInfo = CollectionItemInfo(
+                    rowIndex = index,
+                    rowSpan = 1,
+                    columnIndex =  0,
+                    columnSpan = 1
+                )
+            }
             .fillMaxWidth()
             .padding(8.dp)) {
             val imagePainter: Painter = if (movie.posterUrl.isEmpty() || movie.posterUrl == "N/A") painterResource(id = R.drawable.na_image) else
                 rememberAsyncImagePainter(model = movie.posterUrl)
             Image(
                 painter = imagePainter,
-                contentDescription = stringResource(id = R.string.movie_poster),
+                contentDescription = stringResource(id = R.string.movie_poster, movie.title),
                 modifier = Modifier.size(100.dp),
                 contentScale = ContentScale.FillHeight
             )
@@ -323,10 +319,10 @@ fun MovieItem(movie: Movie) {
                 Text(text = stringResource(id = R.string.year, movie.year), 
                     style = MaterialTheme.typography.bodyMedium)
             }
-            Button(onClick = {}) {
+            Button(onClick = {},
+                modifier = Modifier.clearAndSetSemantics { }) {
                 Text(stringResource(id = R.string.click))
             }
         }
     }
-
 }

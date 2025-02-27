@@ -88,19 +88,18 @@ dependencies {
     // coil
     implementation(libs.coil.compose)
 
-    //dagger
+    //dagger hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     testImplementation(libs.junit)
     testImplementation(libs.turbine)
-    // dagger test
+    // dagger hilt test
     testImplementation(libs.hilt.android.testing)
     kaptTest(libs.hilt.android.compiler)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
-
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

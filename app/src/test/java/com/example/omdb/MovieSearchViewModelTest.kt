@@ -2,6 +2,7 @@ package com.example.omdb
 
 import app.cash.turbine.test
 import com.example.omdb.data.MoviesRepository
+import com.example.omdb.di.TestCoroutineContextProvider
 import com.example.omdb.model.Movie
 import com.example.omdb.model.Result
 import com.example.omdb.model.MovieSearchResult
@@ -18,7 +19,6 @@ import org.junit.Before
 import org.mockito.Mockito
 
 class MovieSearchViewModelTest {
-
     private lateinit var movieViewModel: MovieSearchViewModel
     private val fakeMovieRepository = Mockito.mock(MoviesRepository::class.java)
     private val fakeNetworkObserver = FakeNetworkObserver()
@@ -27,7 +27,8 @@ class MovieSearchViewModelTest {
         // Instantiate the ViewModel with the mock
         movieViewModel = MovieSearchViewModel(
             moviesRepository = fakeMovieRepository,
-            networkObserver = fakeNetworkObserver
+            networkObserver = fakeNetworkObserver,
+            dispatchers = TestCoroutineContextProvider()
         )
     }
 
@@ -36,10 +37,12 @@ class MovieSearchViewModelTest {
         // Act: Trigger the movie search
         fakeNetworkObserver.hasConnection = false
         movieViewModel.searchMovies("Batman")
-
-        // Assert: Verify that the UI state shows an error due to no connection
-        assert(movieViewModel.movieUiState.value is MovieUiState.Error)
-        assert((movieViewModel.movieUiState.value as MovieUiState.Error).message == "No network connection!")
+        movieViewModel.movieUiState.test {
+            val uiState = awaitItem()
+            assert(uiState is MovieUiState.Error)
+            val state = uiState as MovieUiState.Error
+            Assert.assertEquals("No network connection!", state.message)
+        }
     }
 
     @Test
