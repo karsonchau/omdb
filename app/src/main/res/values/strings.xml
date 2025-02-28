@@ -8,9 +8,11 @@
     <string name="game">Game</string>
     <string name="movie">Movie</string>
     <string name="movie_poster">%s poster</string>
+    <string name="no">no</string>
     <string name="no_network_connection">No network connection!</string>
     <string name="selected" tools:ignore="PrivateResource">Selected</string>
     <string name="series">Series</string>
     <string name="title">Title</string>
     <string name="year_type_format">%s | %s</string>
+    <string name="year_type_description">year %s, %s</string>
 </resources>

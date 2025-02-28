@@ -56,10 +56,11 @@ import androidx.compose.ui.semantics.CollectionItemInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.collectionInfo
 import androidx.compose.ui.semantics.collectionItemInfo
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -287,7 +288,10 @@ fun MovieList(result: MovieSearchResult, onLoadMore: () -> Unit) {
 
 @Composable
 fun MovieItem(movie: Movie, index: Int) {
+    val context = LocalContext.current
     val type = movie.type.value.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()}
+    val yearContentDesc = context.getString(R.string.year_type_description, movie.year, type)
+
     Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)) {
         Row(
             modifier = Modifier
@@ -326,7 +330,10 @@ fun MovieItem(movie: Movie, index: Int) {
                 Text(text = stringResource(id = R.string.year_type_format,
                     movie.year,
                     type),
-                    style = MaterialTheme.typography.bodyMedium)
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.semantics {
+                        contentDescription = yearContentDesc
+                    })
                 Spacer(modifier = Modifier.weight(1f))
                 Row {
                     Spacer(modifier = Modifier.weight(1f))
@@ -342,8 +349,7 @@ fun MovieItem(movie: Movie, index: Int) {
     }
 }
 
-
-@Preview
+@PreviewLightDark
 @Composable
 fun MovieItemPreview() {
     val movie = Movie(

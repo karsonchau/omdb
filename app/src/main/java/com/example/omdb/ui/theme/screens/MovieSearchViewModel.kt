@@ -31,7 +31,7 @@ sealed interface MovieUiState {
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
-class MovieSearchViewModel @Inject constructor(
+open class MovieSearchViewModel @Inject constructor(
     private val moviesRepository: MoviesRepository,
     private val networkObserver: NetworkObserver,
     private val dispatchers: CoroutineContextProvider
@@ -40,7 +40,7 @@ class MovieSearchViewModel @Inject constructor(
     private val _movieUiState = MutableStateFlow<MovieUiState>(MovieUiState.Success(MovieSearchResult(
         listOf(), 0, null
     )))
-    val movieUiState: StateFlow<MovieUiState> = _movieUiState.asStateFlow()
+    open val movieUiState: StateFlow<MovieUiState> = _movieUiState.asStateFlow()
 
     private val _searchState = MutableStateFlow(SearchUiState())
     val searchState: StateFlow<SearchUiState> = _searchState.asStateFlow()

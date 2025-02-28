@@ -28,7 +28,7 @@ To use this application, you need an API key from OMDb. Follow these steps:
 2. Open the project in Android Studio.
 3. Add your OMDb API key in the `local.properties` file in the following format:
    ```
-   API_KEY=[YOUR_API_KEY]
+   API_KEY=YOUR_API_KEY
    ```
 4. Build and run the project on an emulator or physical device.
 
