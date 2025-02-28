@@ -37,9 +37,13 @@ open class MovieSearchViewModel @Inject constructor(
     private val dispatchers: CoroutineContextProvider
 ) : ViewModel() {
 
-    private val _movieUiState = MutableStateFlow<MovieUiState>(MovieUiState.Success(MovieSearchResult(
-        listOf(), 0, null
-    )))
+    private val _movieUiState = MutableStateFlow<MovieUiState>(
+        MovieUiState.Success(
+            MovieSearchResult(
+                listOf(), 0, null
+            )
+        )
+    )
     open val movieUiState: StateFlow<MovieUiState> = _movieUiState.asStateFlow()
 
     private val _searchState = MutableStateFlow(SearchUiState())
@@ -47,9 +51,11 @@ open class MovieSearchViewModel @Inject constructor(
 
     val isConnected = networkObserver
         .isConnected
-        .stateIn(viewModelScope,
+        .stateIn(
+            viewModelScope,
             SharingStarted.WhileSubscribed(5000L),
-            false)
+            false
+        )
 
 
     private val take = 10
@@ -61,9 +67,11 @@ open class MovieSearchViewModel @Inject constructor(
                 if (getMoviesJob?.isActive == true) {
                     getMoviesJob?.cancel()
                 }
-                searchMovies(title = it.title,
+                searchMovies(
+                    title = it.title,
                     year = it.year,
-                    movieType = it.movieType)
+                    movieType = it.movieType
+                )
             }
         }
     }
@@ -155,7 +163,8 @@ open class MovieSearchViewModel @Inject constructor(
         when (result) {
             is Result.Success -> {
                 _movieUiState.update { current ->
-                    val oldMovies = (current as? MovieUiState.Success)?.result?.movies ?: emptyList()
+                    val oldMovies =
+                        (current as? MovieUiState.Success)?.result?.movies ?: emptyList()
                     val newMovies = oldMovies.toMutableList().apply { addAll(result.data.movies) }
                     MovieUiState.Success(
                         MovieSearchResult(
@@ -166,6 +175,7 @@ open class MovieSearchViewModel @Inject constructor(
                     )
                 }
             }
+
             is Result.Failure -> {
                 _movieUiState.update { MovieUiState.Error(result.error) }
             }
@@ -178,9 +188,9 @@ open class MovieSearchViewModel @Inject constructor(
     }
 
     fun onTitleChange(title: String) {
-         _searchState.update {
-             it.copy(title = title)
-         }
+        _searchState.update {
+            it.copy(title = title)
+        }
     }
 
     fun onMovieType(movieType: MovieType?) {
@@ -197,9 +207,11 @@ open class MovieSearchViewModel @Inject constructor(
 
     fun reset() {
         _movieUiState.update {
-            MovieUiState.Success(MovieSearchResult(
-                listOf(), 0
-            ))
+            MovieUiState.Success(
+                MovieSearchResult(
+                    listOf(), 0
+                )
+            )
         }
         _searchState.update {
             SearchUiState()

@@ -155,8 +155,10 @@ class MovieSearchScreenTests {
         composeTestRule.waitUntil(timeoutMillis = 400) {
             snackbarHostState.currentSnackbarData?.visuals?.message?.isNotEmpty() == true
         }
-        Assert.assertEquals("No network connection!",
-            snackbarHostState.currentSnackbarData?.visuals?.message)
+        Assert.assertEquals(
+            "No network connection!",
+            snackbarHostState.currentSnackbarData?.visuals?.message
+        )
     }
 
     @Test
@@ -181,8 +183,10 @@ class MovieSearchScreenTests {
         composeTestRule.waitUntil(timeoutMillis = 400) {
             snackbarHostState.currentSnackbarData?.visuals?.message?.isNotEmpty() == true
         }
-        Assert.assertEquals("Error",
-            snackbarHostState.currentSnackbarData?.visuals?.message)
+        Assert.assertEquals(
+            "Error",
+            snackbarHostState.currentSnackbarData?.visuals?.message
+        )
     }
 
     @Test

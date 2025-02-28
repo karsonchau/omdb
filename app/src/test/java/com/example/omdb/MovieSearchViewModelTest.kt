@@ -22,6 +22,7 @@ class MovieSearchViewModelTest {
     private lateinit var movieViewModel: MovieSearchViewModel
     private val fakeMovieRepository = Mockito.mock(MoviesRepository::class.java)
     private val fakeNetworkObserver = FakeNetworkObserver()
+
     @Before
     fun setUp() {
         // Instantiate the ViewModel with the mock
@@ -49,12 +50,17 @@ class MovieSearchViewModelTest {
     fun `searchMovieByTitle - network available - success`() = runBlocking {
         // Set up a mock response for the repository
         val title = "Batman"
-        val mockMovies = MovieSearchResult(movies = listOf(Movie(
-            title,
-            "2022",
-            "",
-            MovieType.MOVIE,
-            "")), totalResults = 1)
+        val mockMovies = MovieSearchResult(
+            movies = listOf(
+                Movie(
+                    title,
+                    "2022",
+                    "",
+                    MovieType.MOVIE,
+                    ""
+                )
+            ), totalResults = 1
+        )
         Mockito.`when`(fakeMovieRepository.getMovies(title, null, null, null))
             .thenReturn(Result.Success(mockMovies))
 
@@ -91,7 +97,7 @@ class MovieSearchViewModelTest {
     }
 }
 
-class FakeNetworkObserver: NetworkObserver {
+class FakeNetworkObserver : NetworkObserver {
     override var hasConnection: Boolean = true
     private val flow = MutableStateFlow(false)
 

@@ -10,18 +10,19 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
-class AndroidNetworkObserver(context: Context): NetworkObserver {
+class AndroidNetworkObserver(context: Context) : NetworkObserver {
     private val connectivityManager = context.getSystemService<ConnectivityManager>()!!
 
     override val isConnected: Flow<Boolean>
         get() = callbackFlow {
-            val callback = object: NetworkCallback() {
+            val callback = object : NetworkCallback() {
                 override fun onCapabilitiesChanged(
                     network: Network,
                     networkCapabilities: NetworkCapabilities
                 ) {
                     super.onCapabilitiesChanged(network, networkCapabilities)
-                    val connected = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                    val connected =
+                        networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
                     trySend(connected)
                     hasConnection = connected
                 }

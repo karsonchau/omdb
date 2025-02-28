@@ -76,10 +76,12 @@ import java.util.Calendar
 import java.util.Locale
 
 @Composable
-fun MovieSearchScreen(viewModel: MovieSearchViewModel = hiltViewModel(),
-                      snackbarHostState: SnackbarHostState,
-                      coroutineScope: CoroutineScope,
-                      contentPadding: PaddingValues = PaddingValues(0.dp)) {
+fun MovieSearchScreen(
+    viewModel: MovieSearchViewModel = hiltViewModel(),
+    snackbarHostState: SnackbarHostState,
+    coroutineScope: CoroutineScope,
+    contentPadding: PaddingValues = PaddingValues(0.dp)
+) {
     val uiState by viewModel.movieUiState.collectAsStateWithLifecycle()
     val hasNetwork by viewModel.isConnected.collectAsStateWithLifecycle()
     val searchUiState by viewModel.searchState.collectAsStateWithLifecycle()
@@ -111,11 +113,13 @@ fun MovieSearchScreen(viewModel: MovieSearchViewModel = hiltViewModel(),
             }
         }
     }
-    
-    Column(modifier = Modifier
-        .padding(contentPadding)
-        .fillMaxSize()
-        .padding(16.dp)) {
+
+    Column(
+        modifier = Modifier
+            .padding(contentPadding)
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         OutlinedTextField(
             value = searchUiState.title,
             onValueChange = {
@@ -138,7 +142,7 @@ fun MovieSearchScreen(viewModel: MovieSearchViewModel = hiltViewModel(),
             MovieTypes(movieType = searchUiState.movieType,
                 onMovieTypeChange = { updatedMovieType ->
                     viewModel.onMovieType(movieType = updatedMovieType)
-            })
+                })
         }
         Button(onClick = {
             viewModel.reset()
@@ -152,8 +156,9 @@ fun MovieSearchScreen(viewModel: MovieSearchViewModel = hiltViewModel(),
                     viewModel.searchMovies(
                         title = searchUiState.title,
                         year = searchUiState.year,
-                        movieType = searchUiState.movieType)
-            })
+                        movieType = searchUiState.movieType
+                    )
+                })
         }
     }
 }
@@ -173,8 +178,10 @@ fun MovieTypes(movieType: MovieType?, onMovieTypeChange: (MovieType?) -> Unit) {
     val selectedOption = if (movieType == null) options[""] else options[movieType.value]
 
     Box {
-        OutlinedButton(onClick = { expanded = true },
-            modifier = Modifier.width(dropdownWidth)) {
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.width(dropdownWidth)
+        ) {
             Text(text = selectedOption ?: "")
             Icon(
                 Icons.Default.ArrowDropDown,
@@ -192,12 +199,19 @@ fun MovieTypes(movieType: MovieType?, onMovieTypeChange: (MovieType?) -> Unit) {
                     text = { Text(value) },
                     trailingIcon = {
                         if (value == selectedOption) {
-                            Icon(Icons.Default.Check,
-                                contentDescription = stringResource(id = R.string.selected))
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = stringResource(id = R.string.selected)
+                            )
                         }
                     },
                     onClick = {
-                        onMovieTypeChange(MovieType.entries.find { it.value.equals(key, ignoreCase = true) })
+                        onMovieTypeChange(MovieType.entries.find {
+                            it.value.equals(
+                                key,
+                                ignoreCase = true
+                            )
+                        })
                         expanded = false
                     }
                 )
@@ -219,10 +233,15 @@ fun YearDropdown(
     val dropdownWidth = 150.dp
 
     Box {
-        OutlinedButton(onClick = { expanded = true },
-            modifier = Modifier.width(dropdownWidth)) {
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.width(dropdownWidth)
+        ) {
             Text(text = (if (selectedYear.isNullOrEmpty()) stringResource(id = R.string.any_year) else selectedYear)) // Default to empty
-            Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(id = R.string.dropdown_arrow))
+            Icon(
+                Icons.Default.ArrowDropDown,
+                contentDescription = stringResource(id = R.string.dropdown_arrow)
+            )
         }
 
         DropdownMenu(
@@ -237,8 +256,10 @@ fun YearDropdown(
                     text = { Text(year) },
                     trailingIcon = {
                         if (year == selectedYear || (index == 0 && selectedYear == null)) {
-                            Icon(Icons.Default.Check,
-                                contentDescription = stringResource(id = R.string.selected))
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = stringResource(id = R.string.selected)
+                            )
                         }
                     },
                     onClick = {
@@ -260,7 +281,7 @@ fun MovieList(result: MovieSearchResult, onLoadMore: () -> Unit) {
         state = listState,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.semantics {
-            collectionInfo = CollectionInfo(rowCount = movies.size, columnCount =  1)
+            collectionInfo = CollectionInfo(rowCount = movies.size, columnCount = 1)
         }) {
         items(movies.size, key = { index -> movies[index].imdbID }) { index ->
             val movie = movies[index]
@@ -268,10 +289,12 @@ fun MovieList(result: MovieSearchResult, onLoadMore: () -> Unit) {
         }
         if (movies.size != totalCount && totalCount != 0) {
             item {
-                CircularProgressIndicator(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .wrapContentWidth(Alignment.CenterHorizontally))
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .wrapContentWidth(Alignment.CenterHorizontally)
+                )
             }
         }
     }
@@ -279,7 +302,7 @@ fun MovieList(result: MovieSearchResult, onLoadMore: () -> Unit) {
     LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
             .collect { lastVisibleIndex ->
-                if (lastVisibleIndex != null && lastVisibleIndex >= result.movies.size - 5 ) {
+                if (lastVisibleIndex != null && lastVisibleIndex >= result.movies.size - 5) {
                     onLoadMore()
                 }
             }
@@ -289,7 +312,8 @@ fun MovieList(result: MovieSearchResult, onLoadMore: () -> Unit) {
 @Composable
 fun MovieItem(movie: Movie, index: Int) {
     val context = LocalContext.current
-    val type = movie.type.value.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()}
+    val type =
+        movie.type.value.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
     val yearContentDesc = context.getString(R.string.year_type_description, movie.year, type)
 
     Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)) {
@@ -323,13 +347,17 @@ fun MovieItem(movie: Movie, index: Int) {
                     .weight(1f)
                     .fillMaxHeight()
             ) {
-                Text(text = movie.title,
+                Text(
+                    text = movie.title,
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold)
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = stringResource(id = R.string.year_type_format,
+                Text(text = stringResource(
+                    id = R.string.year_type_format,
                     movie.year,
-                    type),
+                    type
+                ),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.semantics {
                         contentDescription = yearContentDesc
