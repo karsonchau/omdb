@@ -3,7 +3,7 @@ package com.example.omdb.ui.theme.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.omdb.data.MoviesRepository
-import com.example.omdb.di.CoroutineContextProvider
+import com.example.omdb.model.CoroutineContextProvider
 import com.example.omdb.model.Result
 import com.example.omdb.model.MovieSearchParams
 import com.example.omdb.model.MovieSearchResult

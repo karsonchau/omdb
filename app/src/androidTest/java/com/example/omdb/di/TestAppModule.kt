@@ -1,17 +1,13 @@
 package com.example.omdb.di
 
-import com.example.omdb.data.MoviesRepository
-import com.example.omdb.fake.TestCoroutineContextProvider
+import com.example.omdb.mock.FakeNetworkObserver
 import com.example.omdb.model.CoroutineContextProvider
 import com.example.omdb.network.NetworkObserver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
-import kotlinx.coroutines.Dispatchers
-import org.mockito.Mockito
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Module
 @TestInstallIn(
@@ -22,14 +18,13 @@ object TestAppModule {
     @Provides
     @Singleton
     fun provideNetworkObserver(): NetworkObserver {
-        return Mockito.mock(NetworkObserver::class.java)
+        return FakeNetworkObserver()
     }
 
     @Provides
     @Singleton
-    fun provideCoroutineContext(): CoroutineContextProvider {
-        return TestCoroutineContextProvider()
+    fun provideContextProvider(): CoroutineContextProvider {
+        return CoroutineContextProvider.Default()
     }
 }
-
 

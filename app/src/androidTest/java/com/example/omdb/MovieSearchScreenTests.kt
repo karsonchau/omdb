@@ -8,7 +8,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.example.omdb.di.AppModule
-import com.example.omdb.di.CoroutineContextProvider
+import com.example.omdb.model.CoroutineContextProvider
 import com.example.omdb.mock.FakeMovieRepository
 import com.example.omdb.mock.FakeNetworkObserver
 import com.example.omdb.model.Movie

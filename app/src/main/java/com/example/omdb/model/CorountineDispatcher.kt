@@ -1,4 +1,4 @@
-package com.example.omdb.di
+package com.example.omdb.model
 
 import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext

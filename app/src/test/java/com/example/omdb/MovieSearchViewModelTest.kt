@@ -2,16 +2,14 @@ package com.example.omdb
 
 import app.cash.turbine.test
 import com.example.omdb.data.MoviesRepository
-import com.example.omdb.di.TestCoroutineContextProvider
+import com.example.omdb.fake.FakeNetworkObserver
+import com.example.omdb.fake.TestCoroutineContextProvider
 import com.example.omdb.model.Movie
 import com.example.omdb.model.Result
 import com.example.omdb.model.MovieSearchResult
 import com.example.omdb.model.MovieType
-import com.example.omdb.network.NetworkObserver
 import com.example.omdb.ui.theme.screens.MovieUiState
 import com.example.omdb.ui.theme.screens.MovieSearchViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
@@ -95,12 +93,4 @@ class MovieSearchViewModelTest {
             Assert.assertEquals("Movie not found!", state.message)
         }
     }
-}
-
-class FakeNetworkObserver : NetworkObserver {
-    override var hasConnection: Boolean = true
-    private val flow = MutableStateFlow(false)
-
-    override val isConnected: Flow<Boolean>
-        get() = flow
 }
