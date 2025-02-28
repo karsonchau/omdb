@@ -1,16 +1,18 @@
 package com.example.omdb.ui.theme.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -55,7 +57,9 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.collectionInfo
 import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -64,17 +68,11 @@ import com.example.omdb.R
 import com.example.omdb.model.Movie
 import com.example.omdb.model.MovieSearchResult
 import com.example.omdb.model.MovieType
-import com.example.omdb.ui.theme.DarkEpisodePurple
-import com.example.omdb.ui.theme.DarkGameOrange
-import com.example.omdb.ui.theme.DarkMovieBlue
-import com.example.omdb.ui.theme.DarkSeriesGreen
-import com.example.omdb.ui.theme.LightEpisodePurple
-import com.example.omdb.ui.theme.LightGameOrange
-import com.example.omdb.ui.theme.LightMovieBlue
-import com.example.omdb.ui.theme.LightSeriesGreen
+import com.example.omdb.ui.theme.OMDbTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun MovieSearchScreen(viewModel: MovieSearchViewModel = hiltViewModel(),
@@ -126,11 +124,11 @@ fun MovieSearchScreen(viewModel: MovieSearchViewModel = hiltViewModel(),
                 Text(text = stringResource(id = R.string.title))
             },
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
+                .fillMaxWidth(),
             keyboardActions = KeyboardActions.Default,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
         )
+        Spacer(modifier = Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.Center) {
             YearDropdown(selectedYear = searchUiState.year, onYearSelected = { updatedYear ->
                 viewModel.onYearChange(year = updatedYear)
@@ -229,7 +227,9 @@ fun YearDropdown(
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.width(dropdownWidth)
+            modifier = Modifier
+                .width(dropdownWidth)
+                .heightIn(max = 300.dp)
         ) {
             years.forEachIndexed { index, year ->
                 DropdownMenuItem(
@@ -287,42 +287,73 @@ fun MovieList(result: MovieSearchResult, onLoadMore: () -> Unit) {
 
 @Composable
 fun MovieItem(movie: Movie, index: Int) {
-    val backgroundColor = when (movie.type) {
-        MovieType.MOVIE -> if (isSystemInDarkTheme()) DarkMovieBlue else LightMovieBlue
-        MovieType.SERIES -> if (isSystemInDarkTheme()) DarkSeriesGreen else LightSeriesGreen
-        MovieType.EPISODE -> if (isSystemInDarkTheme()) DarkEpisodePurple else LightEpisodePurple
-        MovieType.GAME -> if (isSystemInDarkTheme()) DarkGameOrange else LightGameOrange
-    }
-    Card(colors = CardDefaults.cardColors(containerColor = backgroundColor)) {
-        Row(modifier = Modifier
-            .semantics(mergeDescendants = true) {
-                collectionItemInfo = CollectionItemInfo(
-                    rowIndex = index,
-                    rowSpan = 1,
-                    columnIndex =  0,
-                    columnSpan = 1
-                )
-            }
-            .fillMaxWidth()
-            .padding(8.dp)) {
-            val imagePainter: Painter = if (movie.posterUrl.isEmpty() || movie.posterUrl == "N/A") painterResource(id = R.drawable.na_image) else
-                rememberAsyncImagePainter(model = movie.posterUrl)
+    val type = movie.type.value.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()}
+    Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)) {
+        Row(
+            modifier = Modifier
+                .semantics(mergeDescendants = true) {
+                    collectionItemInfo = CollectionItemInfo(
+                        rowIndex = index,
+                        rowSpan = 1,
+                        columnIndex = 0,
+                        columnSpan = 1
+                    )
+                }
+                .fillMaxWidth()
+                .height(IntrinsicSize.Max)
+                .padding(16.dp)
+        ) {
+            val imagePainter: Painter =
+                if (movie.posterUrl.isEmpty() || movie.posterUrl == "N/A")
+                    painterResource(id = R.drawable.na_image) else
+                    rememberAsyncImagePainter(model = movie.posterUrl)
             Image(
                 painter = imagePainter,
                 contentDescription = stringResource(id = R.string.movie_poster, movie.title),
-                modifier = Modifier.size(100.dp),
-                contentScale = ContentScale.FillHeight
+                modifier = Modifier.size(height = 150.dp, width = 100.dp),
+                contentScale = ContentScale.Fit
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = movie.title, style = MaterialTheme.typography.titleMedium)
-                Text(text = stringResource(id = R.string.year, movie.year), 
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) {
+                Text(text = movie.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = stringResource(id = R.string.year_type_format,
+                    movie.year,
+                    type),
                     style = MaterialTheme.typography.bodyMedium)
-            }
-            Button(onClick = {},
-                modifier = Modifier.clearAndSetSemantics { }) {
-                Text(stringResource(id = R.string.click))
+                Spacer(modifier = Modifier.weight(1f))
+                Row {
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(
+                        onClick = {},
+                        modifier = Modifier.clearAndSetSemantics { }
+                    ) {
+                        Text(stringResource(id = R.string.click))
+                    }
+                }
             }
         }
+    }
+}
+
+
+@Preview
+@Composable
+fun MovieItemPreview() {
+    val movie = Movie(
+        title = "Avengers: Endgame",
+        year = "2019",
+        imdbID = "tt4154796",
+        type = MovieType.MOVIE,
+        posterUrl = "https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_SX300.jpg"
+    )
+    OMDbTheme {
+        MovieItem(movie = movie, index = 0)
     }
 }

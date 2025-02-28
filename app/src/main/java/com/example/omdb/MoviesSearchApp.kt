@@ -54,6 +54,5 @@ fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior, modifier: Modifier = Modi
             )
         },
         modifier = modifier,
-        colors = TopAppBarDefaults.topAppBarColors().copy(containerColor = MaterialTheme.colorScheme.secondary)
     )
 }

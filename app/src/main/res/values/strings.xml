@@ -12,5 +12,5 @@
     <string name="selected" tools:ignore="PrivateResource">Selected</string>
     <string name="series">Series</string>
     <string name="title">Title</string>
-    <string name="year">Year: %s</string>
+    <string name="year_type_format">%s | %s</string>
 </resources>
