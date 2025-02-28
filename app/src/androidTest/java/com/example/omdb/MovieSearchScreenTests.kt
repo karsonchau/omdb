@@ -35,11 +35,9 @@ class MovieSearchScreenTests {
     @get:Rule(order = 2)
     val composeTestRule = createComposeRule()
 
-
     @Before
     fun setup() {
         hiltTestRule.inject()
-
     }
 
     private val successResult = Result.Success(
@@ -211,6 +209,7 @@ class MovieSearchScreenTests {
         composeTestRule.waitUntil(timeoutMillis = 500) {
             composeTestRule.onAllNodes(hasText("The Batman")).fetchSemanticsNodes().isNotEmpty()
         }
+        composeTestRule.onNode(hasText("Batman")).assertExists()
         composeTestRule.onNode(hasText("The Batman")).assertExists()
         composeTestRule.onNode(hasText("2022 | Movie")).assertExists()
         composeTestRule.onNode(hasContentDescription("The Batman poster")).assertExists()

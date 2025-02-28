@@ -38,10 +38,4 @@ class MovieSearchAppTest {
     fun hasTitle() {
         composeTestRule.onNodeWithText("OMDb").assertExists()
     }
-
-    @Test
-    fun enterMovieTitle_updatesSearchField() {
-        composeTestRule.onNode(hasText("Title")).performTextInput("Batman")
-        composeTestRule.onNode(hasText("Batman")).assertExists()
-    }
 }

@@ -164,7 +164,12 @@ fun MovieSearchScreen(
 }
 
 @Composable
-fun MovieTypes(movieType: MovieType?, onMovieTypeChange: (MovieType?) -> Unit) {
+fun MovieTypes(
+    movieType: MovieType?,
+    onMovieTypeChange: (MovieType?) -> Unit,
+    modifier: Modifier = Modifier,
+    maxWidth: Int = 150
+) {
     var expanded by remember { mutableStateOf(false) }
     val options = mapOf(
         "" to stringResource(id = R.string.all),
@@ -173,14 +178,13 @@ fun MovieTypes(movieType: MovieType?, onMovieTypeChange: (MovieType?) -> Unit) {
         MovieType.SERIES.value to stringResource(id = R.string.series),
         MovieType.GAME.value to stringResource(id = R.string.game)
     )
-    val dropdownWidth = 150.dp
 
     val selectedOption = if (movieType == null) options[""] else options[movieType.value]
 
-    Box {
+    Box(modifier = modifier) {
         OutlinedButton(
             onClick = { expanded = true },
-            modifier = Modifier.width(dropdownWidth)
+            modifier = Modifier.width(maxWidth.dp)
         ) {
             Text(text = selectedOption ?: "")
             Icon(
@@ -192,7 +196,7 @@ fun MovieTypes(movieType: MovieType?, onMovieTypeChange: (MovieType?) -> Unit) {
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.width(dropdownWidth)
+            modifier = Modifier.width(maxWidth.dp)
         ) {
             options.forEach { (key, value) ->
                 DropdownMenuItem(
@@ -223,19 +227,19 @@ fun MovieTypes(movieType: MovieType?, onMovieTypeChange: (MovieType?) -> Unit) {
 @Composable
 fun YearDropdown(
     selectedYear: String?,
-    onYearSelected: (String) -> Unit
+    onYearSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    maxWidth: Int = 150,
+    maxHeight: Int = 300
 ) {
     var expanded by remember { mutableStateOf(false) }
     val currentYear = Calendar.getInstance().get(Calendar.YEAR)
     val years = (1950..currentYear).map { it.toString() }.reversed().toMutableList()
     years.add(0, LocalContext.current.getString(R.string.any_year))
-
-    val dropdownWidth = 150.dp
-
-    Box {
+    Box(modifier = modifier) {
         OutlinedButton(
             onClick = { expanded = true },
-            modifier = Modifier.width(dropdownWidth)
+            modifier = Modifier.width(maxWidth.dp)
         ) {
             Text(text = (if (selectedYear.isNullOrEmpty()) stringResource(id = R.string.any_year) else selectedYear)) // Default to empty
             Icon(
@@ -248,8 +252,8 @@ fun YearDropdown(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier
-                .width(dropdownWidth)
-                .heightIn(max = 300.dp)
+                .width(maxWidth.dp)
+                .heightIn(max = maxHeight.dp)
         ) {
             years.forEachIndexed { index, year ->
                 DropdownMenuItem(
@@ -273,14 +277,18 @@ fun YearDropdown(
 }
 
 @Composable
-fun MovieList(result: MovieSearchResult, onLoadMore: () -> Unit) {
+fun MovieList(
+    result: MovieSearchResult,
+    onLoadMore: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val listState = rememberLazyListState()
     val movies = result.movies
     val totalCount = result.totalResults
     LazyColumn(
         state = listState,
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.semantics {
+        modifier = modifier.semantics {
             collectionInfo = CollectionInfo(rowCount = movies.size, columnCount = 1)
         }) {
         items(movies.size, key = { index -> movies[index].imdbID }) { index ->
@@ -310,13 +318,16 @@ fun MovieList(result: MovieSearchResult, onLoadMore: () -> Unit) {
 }
 
 @Composable
-fun MovieItem(movie: Movie, index: Int) {
+fun MovieItem(movie: Movie, index: Int, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val type =
         movie.type.value.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
     val yearContentDesc = context.getString(R.string.year_type_description, movie.year, type)
 
-    Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)) {
+    Card(
+        modifier = modifier,
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)
+    ) {
         Row(
             modifier = Modifier
                 .semantics(mergeDescendants = true) {
